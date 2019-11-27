@@ -867,7 +867,7 @@ def guess_most_likely_properties(chords_properties):
     properties_filter = HarmonicPropertiesFilter(chords_properties)
     properties_filter.add_predicate(Predicate(have_known_base_type))
     properties_filter.add_predicate(Predicate(have_valid_enrichments))
-    #properties_filter.add_predicate(Predicate(count_enrichments, count_minimum_enrichments(chords_properties)))
+    properties_filter.add_predicate(Predicate(count_enrichments, count_minimum_enrichments(chords_properties)))
     return properties_filter.filtered()
 
 
