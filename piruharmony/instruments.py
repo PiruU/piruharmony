@@ -1,12 +1,12 @@
 
 from keyboard import notes_references
+from theory import keyboard_to_chord_properties
 
 REGULAR_GUITAR_TUNING = ['E3', 'A3', 'D4', 'G4', 'B4', 'E5']
 REGULAR_MANDOLIN_TUNING = ['G4', 'D5', 'A5', 'E6']
 REGULAR_UKULELE_TUNING = ['G4', 'C4', 'E4', 'A4']
 REGULAR_BANJO_TUNING = ['G5', 'D4', 'G4', 'B4', 'D5']
 REGULAR_BASS_TUNING = ['E1', 'A1', 'D2', 'G2']
-
 
 def guitar():
     """
@@ -249,5 +249,9 @@ class StringsInstrument:
     def to_keyboard(self, i_frets):
         """ Returns piano's keys ids corresponding to i_frets """
         i_strings = range(self.count_strings())
-        return [self._single_string_to_keyboard(i_string, i_fret) for (i_string, i_fret) in zip(i_strings, i_frets)]
+        return list(filter(None, [self._single_string_to_keyboard(i_string, i_fret) for (i_string, i_fret) in zip(i_strings, i_frets)]))
 
+    def to_chord_properties(self, i_frets):
+        """ Returns most likely ChordHarmonicProperties corresponding to i_frets """
+        i_notes_on_keyboard = self.to_keyboard(i_frets)
+        return keyboard_to_chord_properties(i_notes_on_keyboard)
