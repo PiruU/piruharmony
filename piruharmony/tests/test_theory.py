@@ -240,25 +240,89 @@ def test_seventh_contains_seventh_triad():
 def test_tonality_chord_harmonic_properties_Fsus4():
     tested_properties = ChordHarmonicProperties('F', ChordsTypes.MAJOR_TRIAD, [IntervalsTypes.FOURTH])
     expected_tonality = 'F'
-    return tested_properties.tonality() == expected_tonality
+    assert tested_properties.tonality() == expected_tonality
 
 def test_base_type_name_chord_harmonic_properties_Fsus4():
     tested_properties = ChordHarmonicProperties('F', ChordsTypes.MAJOR_TRIAD, [IntervalsTypes.FOURTH])
     expected_base_type_name = 'MAJOR_TRIAD'
-    return tested_properties.base_type().name == expected_base_type_name
+    assert tested_properties.base_type().name == expected_base_type_name
 
 def test_enrichments_semitones_count_chord_harmonic_properties_Fsus4():
     tested_properties = ChordHarmonicProperties('F', ChordsTypes.MAJOR_TRIAD, [IntervalsTypes.FOURTH])
     expected_n_semitones = 5
-    return tested_properties.enrichments()[0].value.count_semitones() == expected_n_semitones
+    assert tested_properties.enrichments()[0].value.count_semitones() == expected_n_semitones
 
 def test_count_enrichments_chord_harmonic_properties_Fsus4():
     tested_properties = ChordHarmonicProperties('F', ChordsTypes.MAJOR_TRIAD, [IntervalsTypes.FOURTH])
     expected_n_enrichments = 1
-    return tested_properties.count_enrichments() == expected_n_enrichments
+    assert tested_properties.count_enrichments() == expected_n_enrichments
 
 def test_count_enrichments_chord_harmonic_properties_Fsus2sus4():
     tested_properties = ChordHarmonicProperties('F', ChordsTypes.MAJOR_TRIAD, [IntervalsTypes.NINTH, IntervalsTypes.FOURTH])
     expected_n_enrichments = 2
-    return tested_properties.count_enrichments() == expected_n_enrichments
+    assert tested_properties.count_enrichments() == expected_n_enrichments
 
+def test_chord_explorer_eb_tonality():
+    tested_tonality = chord_explorer(['Eb3', 'G4', 'Bb5']).tonality()
+    expected_tonality = 'Eb'
+    assert tested_tonality == expected_tonality
+
+def test_chord_explorer_g_tonality():
+    tested_tonality = chord_explorer(['G4', 'Eb5', 'Bb5']).tonality()
+    expected_tonality = 'G'
+    assert tested_tonality == expected_tonality
+
+def test_chord_explorer_major_triad():
+    tested_base_types = chord_explorer(['C3', 'E4', 'G5']).possible_base_types()
+    expected_base_type = ChordsTypes.MAJOR_TRIAD
+    assert expected_base_type in tested_base_types
+
+def test_chord_explorer_minor_triad():
+    tested_base_types = chord_explorer(['C3', 'Eb4', 'G5']).possible_base_types()
+    expected_base_type = ChordsTypes.MINOR_TRIAD
+    assert expected_base_type in tested_base_types
+
+def test_chord_explorer_major_seventh_triad():
+    tested_base_types = chord_explorer(['C3', 'E4', 'B5']).possible_base_types()
+    expected_base_type = ChordsTypes.MAJOR_SEVENTH_TRIAD
+    assert expected_base_type in tested_base_types
+
+def test_chord_explorer_minor_seventh_triad():
+    tested_base_types = chord_explorer(['C3', 'Eb4', 'Bb5']).possible_base_types()
+    expected_base_type = ChordsTypes.MINOR_SEVENTH_TRIAD
+    assert expected_base_type in tested_base_types
+
+def test_chord_explorer_minor_major_seventh_triad():
+    tested_base_types = chord_explorer(['C3', 'Eb4', 'B5']).possible_base_types()
+    expected_base_type = ChordsTypes.MINOR_MAJOR_SEVENTH_TRIAD
+    assert expected_base_type in tested_base_types
+
+def test_chord_explorer_seventh_triad():
+    tested_base_types = chord_explorer(['C3', 'E4', 'Bb5']).possible_base_types()
+    expected_base_type = ChordsTypes.SEVENTH_TRIAD
+    assert expected_base_type in tested_base_types
+
+def test_chord_explorer_diminished_triad():
+    tested_base_types = chord_explorer(['C3', 'Eb4', 'Gb5']).possible_base_types()
+    expected_base_type = ChordsTypes.DIMINISHED_TRIAD
+    assert expected_base_type in tested_base_types
+
+def test_chord_explorer_major_seventh():
+    tested_base_types = chord_explorer(['C3', 'E4', 'G5', 'B4']).possible_base_types()
+    expected_base_type = ChordsTypes.MAJOR_SEVENTH
+    assert expected_base_type in tested_base_types
+
+def test_chord_explorer_minor_seventh():
+    tested_base_types = chord_explorer(['C3', 'Eb4', 'G5', 'Bb5']).possible_base_types()
+    expected_base_type = ChordsTypes.MINOR_SEVENTH
+    assert expected_base_type in tested_base_types
+
+def test_chord_explorer_minor_major_seventh():
+    tested_base_types = chord_explorer(['C3', 'Eb4', 'G5', 'B5']).possible_base_types()
+    expected_base_type = ChordsTypes.MINOR_MAJOR_SEVENTH
+    assert expected_base_type in tested_base_types
+
+def test_chord_explorer_seventh():
+    tested_base_types = chord_explorer(['G3', 'B3', 'D4', 'F4']).possible_base_types()
+    expected_base_type = ChordsTypes.SEVENTH
+    assert expected_base_type in tested_base_types
