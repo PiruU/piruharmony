@@ -608,7 +608,6 @@ def chord(notes_names):
     True
     >>> my_chord.has_type(ChordsTypes.DIMINISHED_TRIAD)
     False
-    --------
     """
     intervals_list = cleared_intervals(notes_names)
     bass_note = lowest_note(notes_names)
@@ -685,30 +684,101 @@ class ChordsTypes(Enum):
     UNKNOWN                   = []
 
 
+def chord_explorer(notes_names):
+    """
+    Returns an instance of class ChordExplorer.
+
+    Parameters
+    ----------
+    notes_names : list of two or three characters.
+        Name of notes composing the chord. Tags in notes_names are
+        given in english notation.
+
+    Returns
+    -------
+    out : ChordExplorer
+        The instance of class ChordExplorer corresponding to the
+        input parameters.
+
+    See Also
+    --------
+    ChordExplorer : a class used so as to explore chords properties.
+
+    Examples
+    --------
+    >>> explorer = chord_explorer(['C3', 'Eb3', 'G3', 'B3'])
+    >>> for harmonic_properties in explorer.possible_harmonic_properties():
+    ...     print('Tonality    :', harmonic_properties.tonality())
+    ...     print('Base type   :', harmonic_properties.base_type().name)
+    ...     print('Enrichments :', [e.name for e in harmonic_properties.enrichments()])
+    ...     print('')
+    Tonality    : C
+    Base type   : MINOR_TRIAD
+    Enrichments : ['MAJOR_SEVENTH']
+
+    Tonality    : C
+    Base type   : MINOR_MAJOR_SEVENTH
+    Enrichments : []
+
+    Tonality    : C
+    Base type   : MINOR_MAJOR_SEVENTH_TRIAD
+    Enrichments : ['FIFTH']
+
+    Tonality    : C
+    Base type   : ROCK_FIFTH
+    Enrich      : ['MINOR_THIRD', 'MAJOR_SEVENTH']
+
+    Tonality    : C
+    Base type   : UNKNOWN
+    Enrichments : ['MINOR_THIRD', 'FIFTH', 'MAJOR_SEVENTH']
+    """
+    return ChordExplorer(chord(notes_names))
+
+
 class ChordExplorer:
     """
+    A class that can be used so as to explore chords properties.
+
+    Parameters
+    ----------
+    explored_chord : Chord
+        chord the properties of which will be analyzed.
+
+    Examples
+    --------
+
+    Build a major triad chord with root note C3
+    >>> my_root_note = note('C3')
+    >>> my_intervals = [IntervalsTypes.MAJOR_THIRD.value, IntervalsTypes.FIFTH.value]
+    >>> my_chord = Chord(root_note = my_root_note, chord_intervals = my_intervals)
+
+    Compare chords intervals
+    >>> my_chord.has_type(ChordsTypes.MAJOR_TRIAD)
+    True
+    >>> my_chord.has_type(ChordsTypes.MINOR_TRIAD)
+    False
     """
     def __init__(self, explored_chord):
-        """  """
+        """ Builds an instance of ChordExplorer """
         self._chord = explored_chord
 
     def tonality(self):
-        """  """
+        """ Returns the chord's root note tonality """
         return self._chord.root_note().tonality()
 
     def possible_base_types(self):
-        """  """
+        """ Returns chord's all possible base types refered to as in enum ChordsTypes """
         return [type for type in ChordsTypes if self._chord.contains_type(type)]
 
     def possible_enrichments_lists(self):
-        """  """
+        """ Returns chord's all possible listes of enrichments intervals refered to as in enum IntervalsTypes """
         base_types, enrichments = self.possible_base_types(), []
         for base_type in base_types:
             enrichments.append([interval.type() for interval in self._chord.intervals() if interval.type() not in base_type.value])
         return enrichments
 
     def possible_harmonic_properties(self):
-        """  """
+        """ Returns the list of all possible harmonic properties as instances of ChordHarmonicProperties """
         tonality = self.tonality()
         types_zip_enrichments = zip(self.possible_base_types(), self.possible_enrichments_lists())
         return [ChordHarmonicProperties(tonality, type, enrichments) for (type, enrichments) in types_zip_enrichments]        
@@ -734,14 +804,20 @@ class ChordHarmonicProperties:
 
     Build the properties of an F#sus4
     >>> chord_properties = ChordHarmonicProperties('F#', ChordsTypes.MAJOR_TRIAD, [IntervalsTypes.FOURTH])
+
+    Show chord's tonality
     >>> chord_properties.tonality()
     'F#'
+
+    Show chord's base type
     >>> chord_properties.base_type().name
     'MAJOR_TRIAD'
-    >>> [interval.type().name for interval in chord_properties.base_type().value]
-    ['MAJOR_THIRD', 'FIFTH']
+
+    Show chord's enrichments
     >>> [interval.name for interval in chord_properties.enrichments()]
     ['FOURTH']
+
+    Count the number of enrichments
     >>> chord_properties.count_enrichments()
     1
     """
@@ -770,11 +846,32 @@ class ChordHarmonicProperties:
 
 def _keyboard_to_possible_notes_names(i_note):
     """
+    Returns all notes names corresponding to a keyboard note index.
+
+    Parameters
+    ----------
+    i_note : int in [0 - 88]
+        note index on keyboard.
+
+    Returns
+    -------
+    out : List of two or three chars
+        The name of the note correponding to i_note. The returned
+        name is given in english notation.
+
+    Examples
+    --------
+    >>> _keyboard_to_possible_notes_names(22)
+    ['G2']
+    >>> _keyboard_to_possible_notes_names(38)
+    ['B3', 'Cb3']
+    >>> _keyboard_to_possible_notes_names(43)
+    ['E4', 'Fb4']
     """
     return [key for key in notes_references.keys() if notes_references[key] == i_note]
 
 
-class KeyboardToHarmonyTranslator:
+class KeyboardToHarmonicPropertiesTranslator:
     """
     """
     def __init__(self, i_notes_on_keyboard):
@@ -843,7 +940,7 @@ def count_enrichments(chord_properties):
 """
 VALID_ENRICHMENTS = [
 IntervalsTypes.DIMINISHED_NINTH , IntervalsTypes.NINTH          , IntervalsTypes.AUGMENTED_NINTH ,
-IntervalsTypes.DIMINISHED_FOURTH, IntervalsTypes.FOURTH         ,IntervalsTypes.AUGMENTED_FOURTH ,
+IntervalsTypes.DIMINISHED_FOURTH, IntervalsTypes.FOURTH         , IntervalsTypes.AUGMENTED_FOURTH,
 IntervalsTypes.DIMINISHED_FIFTH , IntervalsTypes.AUGMENTED_FIFTH, IntervalsTypes.DIMINISHED_SIXTH,
 IntervalsTypes.SIXTH            , IntervalsTypes.AUGMENTED_SIXTH
 ]
@@ -874,7 +971,7 @@ def guess_most_likely_properties(chords_properties):
 def keyboard_to_chord_properties(i_notes_on_keyboard):
     """
     """
-    all_possible = KeyboardToHarmonyTranslator(i_notes_on_keyboard).possible_harmonic_properties()
+    all_possible = KeyboardToHarmonicPropertiesTranslator(i_notes_on_keyboard).possible_harmonic_properties()
     most_likely = guess_most_likely_properties(all_possible)
     if len(most_likely) > 0:
         return most_likely[0]
