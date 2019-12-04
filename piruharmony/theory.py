@@ -843,6 +843,13 @@ class ChordHarmonicProperties:
         """ Returns the number of enrichments in the chord """
         return len(self._enrichments)
 
+    def __eq__(self, other):
+        """ Comparison operator overloading """
+        same_tonality    = self.tonality()    == other.tonality()
+        same_base_type   = self.base_type()   == other.base_type()
+        same_enrichments = self.enrichments() == other.enrichments()
+        return same_tonality and same_base_type and same_enrichments
+
 
 def _keyboard_to_possible_notes_names(i_note):
     """
@@ -873,51 +880,159 @@ def _keyboard_to_possible_notes_names(i_note):
 
 class KeyboardToHarmonicPropertiesTranslator:
     """
+    A class that converts notes indices on keyboard into harmonic
+    properties.
+
+    Parameters
+    ----------
+    i_notes_on_keyborad : list of intergers in range(0, 88)
+        List of notes indices on kyboard composing a chord.
+
+    Examples
+    --------
+    >>> translator = KeyboardToHarmonicPropertiesTranslator([27, 31, 34])
+    >>> harmonic_properties = translator.possible_harmonic_properties()
+    >>> for p in harmonic_properties:
+    ...     print('Tonality   :', p.tonality())
+    ...     print('Base type  :', p.base_type().name)
+    ...     print('Enrichments:', [e.name for e in p.enrichments()])
+    ...     print('')
+    Tonality   : B#
+    Base type  : UNKNOWN
+    Enrichments: ['DIMINISHED_FOURTH', 'UNKNOWN']
+
+    Tonality   : B#
+    Base type  : UNKNOWN
+    Enrichments: ['UNKNOWN', 'UNKNOWN']
+
+    Tonality   : C
+    Base type  : MAJOR_TRIAD
+    Enrichments: []
+
+    Tonality   : C
+    Base type  : ROCK_FIFTH
+    Enrichments: ['MAJOR_THIRD']
+
+    Tonality   : C
+    Base type  : UNKNOWN
+    Enrichments: ['MAJOR_THIRD', 'FIFTH']
+
+    Tonality   : C
+    Base type  : ROCK_FIFTH
+    Enrichments: ['DIMINISHED_FOURTH']
+
+    Tonality   : C
+    Base type  : UNKNOWN
+    Enrichments: ['DIMINISHED_FOURTH', 'FIFTH']
     """
     def __init__(self, i_notes_on_keyboard):
+        """ Builds an instance of KeyboardToHarmonicPropertiesTranslator """
         self._i_notes = i_notes_on_keyboard
 
     def possible_notes_names_lists(self):
-        """  """
+        """ Returns all possible notes names corresponding to each note index """
         return [_keyboard_to_possible_notes_names(i_note) for i_note in self._i_notes]
 
     def possible_chords(self):
-        """  """
+        """ Returns all possible instances af Chord corresponding to notes indices """
         notes_names_lists = self.possible_notes_names_lists()
         return [chord(notes_names) for notes_names in list(product(*notes_names_lists))]
 
     def possible_harmonic_properties(self):
+        """ Returns all possible ChordHarmonicProperties corresponding to notes indices """
         possible_chords = self.possible_chords()
         return reduce(add, [ChordExplorer(chord).possible_harmonic_properties() for chord in possible_chords])
 
 
-def have_known_base_type(chord_properties):
+def has_known_base_type(chord_properties):
+    """
+    Returns True if chord_properties has a known base type.
+
+    Parameters
+    ----------
+    chord_properties : ChordHarmonicProperties
+        The instance of the above class that will be tested.
+
+    Returns
+    -------
+    out : bool
+        True if chord_properties has a valid base type, False
+        otherwise.
+
+    Examples
+    --------
+    >>> tested_properties = ChordHarmonicProperties('C', ChordsTypes.UNKNOWN, [])
+    >>> has_known_base_type(tested_properties)
+    False
+    >>> tested_properties = ChordHarmonicProperties('C', ChordsTypes.MAJOR_TRIAD, [])
+    >>> has_known_base_type(tested_properties)
+    True
+    """
     return chord_properties.base_type().name != 'UNKNOWN'
 
 
 class Predicate:
     """
+    A class that encapsulates test function and expected return
+
+    Parameters
+    ----------
+    function : Function reference
+        The function that will be evaluated to test the predicate.
+        This function must take a single argument and must return a
+        boolean.
+    expected_return : bool
+        Overights True. Expected return of the test function.
+
+    Examples
+    --------
+    >>> def is_zero(value):
+    ...     return value == 0
+    >>> predicate = Predicate(is_zero, True)
+    >>> predicate.test(1)
+    False
+    >>> predicate.test(0)
+    True
     """
     def __init__(self, function, expected_return = True):
+        """ Builds an instance of Predicate """
         self._function = function
         self._return = expected_return
 
     def test(self, arguments):
+        """ Tests the validity of the predicate """
         return self._function(arguments) == self._return
 
 
 class HarmonicPropertiesFilter:
     """
+    A class that filters a list of ChordHarmonicProperties
+
+    Parameters
+    ----------
+    chords_properties : list of ChordHarmonicProperties
+        The list of ChordHarmonicProperties instances that will be
+        filtered.
+
+    Examples
+    --------
+    >>> all_properties = chord_explorer(['C3', 'Eb3', 'G3', 'B3']).possible_harmonic_properties()
+    >>> filtered_properties = HarmonicPropertiesFilter(all_properties).add_predicate(Predicate(has_known_base_type)).filtered()
+    >>> [p.base_type().name for p in filtered_properties]
+    ['MINOR_TRIAD', 'MINOR_MAJOR_SEVENTH', 'MINOR_MAJOR_SEVENTH_TRIAD', 'ROCK_FIFTH'] # no 'UNKONWN' in that list
     """
     def __init__(self, chords_properties):
+        """ Builds an instance of HarmonicPropertiesFilter """
         self._chords_properties = chords_properties
         self._predicates = []
 
     def add_predicate(self, predicate):
+        """ Adds a predicate filter that applies to each element of self._chords_properties """
         self._predicates.append(predicate)
         return self
 
     def filtered(self):
+        """ Returns the elements after filtering """
         for predicate in self._predicates:
             self._chords_properties = list(filter(lambda properties: predicate.test(properties), self._chords_properties))
         return self._chords_properties
@@ -925,18 +1040,55 @@ class HarmonicPropertiesFilter:
 
 def count_minimum_enrichments(chords_properties):
     """
+    Returns the minimum number of enrichments among a list of
+    ChordHarmonicProperties
+
+    Parameters
+    ----------
+    chords_properties : list of ChordHarmonicProperties
+        The list of ChordHarmonicProperties of which the number of
+        enrichments of each element will be counted.
+
+    Returns
+    -------
+    out : int
+        The minimum number of enrichments among chords_properties.
+
+    Examples
+    --------
+    >>> all_properties = chord_explorer(['C3', 'Eb3', 'G3', 'B3']).possible_harmonic_properties()
+    >>> count_minimum_enrichments(all_properties)
+    0
     """
     return min([properties.count_enrichments() for properties in chords_properties])
 
 
 def count_enrichments(chord_properties):
     """
+    Returns the number of enrichments in a ChordHarmonicProperties
+
+    Parameters
+    ----------
+    chords_properties : list of ChordHarmonicProperties
+        The tested ChordHarmonicProperties instance.
+
+    Returns
+    -------
+    out : int
+        The number of enrichments in chord_properties.
+
+    Examples
+    --------
+    >>> chord_properties = ChordHarmonicProperties('C', ChordsTypes.MAJOR_TRIAD, [IntervalsTypes.MAJOR_SEVENTH])
+    >>> count_enrichments(chord_properties)
+    1
     """
     return chord_properties.count_enrichments()
 
 
-
 """
+Gathers all intervals that can be recognized as valid enrichments.
+For instance, a MAJOR_THIRD is not a valid enrichment.
 """
 VALID_ENRICHMENTS = [
 IntervalsTypes.DIMINISHED_NINTH , IntervalsTypes.NINTH          , IntervalsTypes.AUGMENTED_NINTH ,
@@ -946,35 +1098,124 @@ IntervalsTypes.SIXTH            , IntervalsTypes.AUGMENTED_SIXTH
 ]
 
 
-def _is_valid_enrichment(enrichment):
+def _is_valid_enrichment(tested_interval):
     """
+    Returns True if tested_interval is a valid enrichment
+
+    Parameters
+    ----------
+    tested_interval : One field in enum IntervalsTypes
+        The tested interval refered to as in enum class
+        IntervalsTypes.
+
+    Returns
+    -------
+    out : bool
+        True if tested_interval is a valid enrichment.
+
+    Examples
+    --------
+    >>> _is_valid_enrichment(IntervalsTypes.MAJOR_THIRD)
+    False
+    >>> _is_valid_enrichment(IntervalsTypes.DIMINISHED_FIFTH)
+    True
     """
-    return enrichment in VALID_ENRICHMENTS
+    return tested_interval in VALID_ENRICHMENTS
 
 
-def have_valid_enrichments(chord_properties):
+def has_valid_enrichments(chord_properties):
     """
+    Tests the validity of a ChordHarmonicPropertie's enrichments
+
+    Parameters
+    ----------
+    chord_properties : ChordHarmonicProperties
+        The instance of ChordHarmonicProperties that's being tested.
+
+    Returns
+    -------
+    out : bool
+        True if all enrichments of chord_properties are intervals
+        that can be considered has harmonicaly valid, False
+        otherwise.
+
+    Examples
+    --------
+    >>> chord_properties = ChordHarmonicProperties('C', ChordsTypes.MAJOR_TRIAD, [IntervalsTypes.FOURTH])
+    >>> has_valid_enrichments(chord_properties)
+    True
+    >>> chord_properties = ChordHarmonicProperties('C', ChordsTypes.ROCK_FIFTH, [IntervalsTypes.MAJOR_THIRD])
+    >>> assert has_valid_enrichments(chord_properties)
+    FALSE # MAJOR_THRID is not considered as an enrichment
     """
     return False not in [_is_valid_enrichment(enrichment) for enrichment in chord_properties.enrichments()]
 
 
-def guess_most_likely_properties(chords_properties):
+def guess_most_likely_harmonic_properties(chords_properties):
     """
+    Returns the most harmonic valid properties in a list
+ 
+    Parameters
+    ----------
+    chords_properties : list of ChordHarmonicProperties
+        Contains the instances of ChordHarmonicProperties that are
+        being tested.
+
+    Returns
+    -------
+    out : list of ChordHarmonicProperties
+        Contains the selected most valid elements from the harmonic
+        point of view.
+
+    Examples
+    --------
+    all_possible = chord_explorer(['C3', 'Eb4', 'F3', 'Bb5']).possible_harmonic_properties()
+    most_likely = guess_most_likely_harmonic_properties(all_possible)
+    >>> for p in most_likely:
+    ...     print('Tonality    :', p.tonality())
+    ...     print('Base type   :', p.base_type().name)
+    ...     print('Enrichments :', [i.name for i in p.enrichments()])
+    ...     print('')
+    Tonality    : C
+    Base type   : MINOR_SEVENTH_TRIAD
+    Enrichments : ['FOURTH']
     """
     properties_filter = HarmonicPropertiesFilter(chords_properties)
-    properties_filter.add_predicate(Predicate(have_known_base_type))
-    properties_filter.add_predicate(Predicate(have_valid_enrichments))
+    properties_filter.add_predicate(Predicate(has_known_base_type))
+    properties_filter.add_predicate(Predicate(has_valid_enrichments))
     properties_filter.add_predicate(Predicate(count_enrichments, count_minimum_enrichments(chords_properties)))
     return properties_filter.filtered()
 
 
 def keyboard_to_chord_properties(i_notes_on_keyboard):
     """
+    Transforms a list of keyboard notes indices into the most likely
+    ChordHarmonicProperties if it exists.
+
+    Parameters
+    ----------
+    i_notes_on_keyboard : list of int
+        Keyboard notes indices
+
+    Returns
+    -------
+    out : ChordHarmonicProperties or None
+        An instance of ChordHarmonicProperties if likely properties
+        can be found, None otherwise.
+
+    Examples
+    --------
+    >>> chord_properties = keyboard_to_chord_properties([27, 31, 34, 44])
+    >>> chord_properties.tonality()
+    C
+    >>> chord_properties.base_type().name
+    MAJOR_TRIAD
+    >>> [i.name for i in chord_properties.enrichments()]
+    ['FOURTH']
     """
     all_possible = KeyboardToHarmonicPropertiesTranslator(i_notes_on_keyboard).possible_harmonic_properties()
-    most_likely = guess_most_likely_properties(all_possible)
+    most_likely = guess_most_likely_harmonic_properties(all_possible)
     if len(most_likely) > 0:
         return most_likely[0]
     else:
         return None
-
