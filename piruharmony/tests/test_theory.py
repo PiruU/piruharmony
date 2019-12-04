@@ -326,3 +326,123 @@ def test_chord_explorer_seventh():
     tested_base_types = chord_explorer(['G3', 'B3', 'D4', 'F4']).possible_base_types()
     expected_base_type = ChordsTypes.SEVENTH
     assert expected_base_type in tested_base_types
+
+def test_keyboard_to_harmonic_properties_translator_base_type_major_triad_in_Csus4():
+    tested_properties = KeyboardToHarmonicPropertiesTranslator([27, 31, 32, 34]).possible_harmonic_properties()
+    assert ChordsTypes.MAJOR_TRIAD in [p.base_type() for p in tested_properties]
+
+def test_keyboard_to_harmonic_properties_translator_base_type_major_seventh_triad_in_C7sus4():
+    tested_properties = KeyboardToHarmonicPropertiesTranslator([27, 31, 32, 38]).possible_harmonic_properties()
+    assert ChordsTypes.MAJOR_SEVENTH_TRIAD in [p.base_type() for p in tested_properties]
+
+def test_keyboard_to_harmonic_properties_translator_enrichments_fourth_in_Csus4():
+    tested_properties = KeyboardToHarmonicPropertiesTranslator([27, 31, 32, 34]).possible_harmonic_properties()
+    assert [IntervalsTypes.FOURTH] in [p.enrichments() for p in tested_properties]
+
+def test_has_known_base_type_false():
+    tested_properties = ChordHarmonicProperties('C', ChordsTypes.UNKNOWN, [])
+    assert has_known_base_type(tested_properties) == False
+
+def test_has_known_base_type_true():
+    tested_properties = ChordHarmonicProperties('C', ChordsTypes.MAJOR_TRIAD, [])
+    assert has_known_base_type(tested_properties) == True
+
+def test_predicate_is_zero_true():
+    def is_zero(value):
+        return value == 0
+    assert Predicate(is_zero, True).test(0) == True
+
+def test_predicate_is_zero_false():
+    def is_zero(value):
+        return value == 0
+    assert Predicate(is_zero, True).test(1) == False
+
+def test_predicate_is_not_zero_true():
+    def is_zero(value):
+        return value == 0
+    assert Predicate(is_zero, False).test(1) == True
+
+def test_predicate_is_not_zero_false():
+    def is_zero(value):
+        return value == 0
+    assert Predicate(is_zero, False).test(0) == False
+
+def test_harmonic_properties_filter_remove_unknown_base_type():
+    all_properties = chord_explorer(['C3', 'Eb3', 'G3', 'B3']).possible_harmonic_properties()
+    filtered_properties = HarmonicPropertiesFilter(all_properties).add_predicate(Predicate(has_known_base_type)).filtered()
+    unknown_in_all_properties = ChordsTypes.UNKNOWN in [p.base_type() for p in all_properties]
+    unknown_not_in_filtered_properties = ChordsTypes.UNKNOWN not in [p.base_type() for p in filtered_properties]
+    assert unknown_in_all_properties and unknown_not_in_filtered_properties
+
+def test_count_minimum_enrichments_is_zero():
+    all_properties = [
+    ChordHarmonicProperties('C', ChordsTypes.MAJOR_TRIAD, [IntervalsTypes.MAJOR_SEVENTH]),
+    ChordHarmonicProperties('C', ChordsTypes.MAJOR_SEVENTH, []),
+    ]
+    expected_return = 0
+    assert count_minimum_enrichments(all_properties) == expected_return
+
+def test_enrichments_is_one():
+    chord_properties = ChordHarmonicProperties('C', ChordsTypes.MAJOR_TRIAD, [IntervalsTypes.MAJOR_SEVENTH])
+    expected_return = 1
+    assert count_enrichments(chord_properties) == expected_return
+
+def test_has_valid_enrichments_true():
+    chord_properties = ChordHarmonicProperties('C', ChordsTypes.MAJOR_TRIAD, [IntervalsTypes.FOURTH])
+    assert has_valid_enrichments(chord_properties) == True
+
+def test_has_valid_enrichments_false():
+    chord_properties = ChordHarmonicProperties('C', ChordsTypes.ROCK_FIFTH, [IntervalsTypes.MAJOR_THIRD])
+    assert has_valid_enrichments(chord_properties) == False
+
+def test_guess_most_likely_harmonic_properties_Csus4():
+    all_possible = chord_explorer(['C3', 'E3', 'F4', 'G5']).possible_harmonic_properties()
+    most_likely = guess_most_likely_harmonic_properties(all_possible)
+    expected = ChordHarmonicProperties('C', ChordsTypes.MAJOR_TRIAD, [IntervalsTypes.FOURTH])
+    assert expected == most_likely[0]
+
+def test_guess_most_likely_harmonic_properties_C5sus4():
+    all_possible = chord_explorer(['C3', 'F4', 'G5']).possible_harmonic_properties()
+    most_likely = guess_most_likely_harmonic_properties(all_possible)
+    expected = ChordHarmonicProperties('C', ChordsTypes.ROCK_FIFTH, [IntervalsTypes.FOURTH])
+    assert expected == most_likely[0]
+
+def test_guess_most_likely_harmonic_properties_Cmaj7():
+    all_possible = chord_explorer(['C3', 'E4', 'G5', 'B5']).possible_harmonic_properties()
+    most_likely = guess_most_likely_harmonic_properties(all_possible)
+    expected = ChordHarmonicProperties('C', ChordsTypes.MAJOR_SEVENTH, [])
+    assert expected == most_likely[0]
+
+def test_guess_most_likely_harmonic_properties_Cmin7():
+    all_possible = chord_explorer(['C3', 'Eb4', 'G5', 'Bb5']).possible_harmonic_properties()
+    most_likely = guess_most_likely_harmonic_properties(all_possible)
+    expected = ChordHarmonicProperties('C', ChordsTypes.MINOR_SEVENTH, [])
+    assert expected == most_likely[0]
+
+def test_guess_most_likely_harmonic_properties_C7():
+    all_possible = chord_explorer(['C3', 'Eb4', 'Bb5']).possible_harmonic_properties()
+    most_likely = guess_most_likely_harmonic_properties(all_possible)
+    expected = ChordHarmonicProperties('C', ChordsTypes.MINOR_SEVENTH_TRIAD, [])
+    assert expected == most_likely[0]
+
+def test_guess_most_likely_harmonic_properties_C7sus4():
+    all_possible = chord_explorer(['C3', 'Eb4', 'F3', 'Bb5']).possible_harmonic_properties()
+    most_likely = guess_most_likely_harmonic_properties(all_possible)
+    expected = ChordHarmonicProperties('C', ChordsTypes.MINOR_SEVENTH_TRIAD, [IntervalsTypes.FOURTH])
+    assert expected == most_likely[0]
+
+def test_keyboard_to_chord_properties_Cmaj():
+    tested = keyboard_to_chord_properties([27, 31, 34])
+    expected = ChordHarmonicProperties('C', ChordsTypes.MAJOR_TRIAD, [])
+    assert tested == expected
+
+def test_keyboard_to_chord_properties_Csus2():
+    tested = keyboard_to_chord_properties([27, 31, 34, 53])
+    expected = ChordHarmonicProperties('C', ChordsTypes.MAJOR_TRIAD, [IntervalsTypes.NINTH])
+    assert tested == expected
+
+def test_keyboard_to_chord_properties_Csus4():
+    tested = keyboard_to_chord_properties([27, 31, 34, 44])
+    expected = ChordHarmonicProperties('C', ChordsTypes.MAJOR_TRIAD, [IntervalsTypes.FOURTH])
+    assert tested == expected
+
