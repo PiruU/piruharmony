@@ -1,12 +1,6 @@
-
 from keyboard import notes_references
 from theory import keyboard_to_chord_properties
 
-REGULAR_GUITAR_TUNING = ['E3', 'A3', 'D4', 'G4', 'B4', 'E5']
-REGULAR_MANDOLIN_TUNING = ['G4', 'D5', 'A5', 'E6']
-REGULAR_UKULELE_TUNING = ['G4', 'C4', 'E4', 'A4']
-REGULAR_BANJO_TUNING = ['G5', 'D4', 'G4', 'B4', 'D5']
-REGULAR_BASS_TUNING = ['E1', 'A1', 'D2', 'G2']
 
 def guitar():
     """
@@ -38,7 +32,8 @@ def guitar():
     >>> my_guitar.to_keyboard(i_frets)
     [None, 39, 43, 46, 51, 55]
     """
-    return strings_instrument(tuning = REGULAR_GUITAR_TUNING)
+    regular_guitar_tuning = ['E3', 'A3', 'D4', 'G4', 'B4', 'E5']
+    return strings_instrument(tuning = regular_guitar_tuning)
 
 
 def bass():
@@ -70,7 +65,8 @@ def bass():
     >>> my_bass.to_keyboard([None, 5, None, None])
     [None, 17, None, None]
     """
-    return strings_instrument(tuning = REGULAR_BASS_TUNING)
+    regular_bass_tuning = ['E1', 'A1', 'D2', 'G2']
+    return strings_instrument(tuning = regular_bass_tuning)
 
 
 def mandolin():
@@ -102,7 +98,8 @@ def mandolin():
     >>> my_mandolin.to_keyboard([None, 5, 3, None])
     [None, 58, 63, None]
     """
-    return strings_instrument(tuning = REGULAR_MANDOLIN_TUNING)
+    regular_mandolin_tuning = ['G4', 'D5', 'A5', 'E6']
+    return strings_instrument(tuning = regular_mandolin_tuning)
 
 
 def banjo():
@@ -134,7 +131,8 @@ def banjo():
     >>> my_banjo.to_keyboard([5, 5, 5, None, 3])
     [63, 46, 51, None, 56]
     """
-    return strings_instrument(tuning = REGULAR_BANJO_TUNING)
+    regular_banjo_tuning = ['G5', 'D4', 'G4', 'B4', 'D5']
+    return strings_instrument(tuning = regular_banjo_tuning)
 
 
 def ukulele():
@@ -167,7 +165,8 @@ def ukulele():
     >>> my_ukulele.to_keyboard(i_frets)
     [48, 41, 45, 50]
     """
-    return strings_instrument(tuning = REGULAR_UKULELE_TUNING)
+    regular_ukulele_tuning = ['G4', 'C4', 'E4', 'A4']
+    return strings_instrument(tuning = regular_ukulele_tuning)
 
 
 def strings_instrument(tuning):
@@ -213,10 +212,10 @@ class StringsInstrument:
     Parameters
     ----------
     tuning : list of two to three characters, optional.
-        Overrides the default tuning. The tuning contains the name
-        of notes corresponding to strings. Notes names are given in
-        english notation. Tags in the list are ordered as the strings
-        are, that is from left to right.
+        The tuning contains the name of notes corresponding to
+        strings. Notes names are given in english notation. Tags in
+        the list are ordered as the strings are, that is from left to
+        right.
 
     Examples
     --------
@@ -234,7 +233,7 @@ class StringsInstrument:
     >>> open_d_guitar.to_keyboard([2, 2, 2, 0, None, None])
     [31, 38, 43, 46, None, None]
     """
-    def __init__(self, tuning = REGULAR_GUITAR_TUNING):
+    def __init__(self, tuning):
         """ Constructor of class StringsIntrument's instances """
         self._tuning = tuning
 
