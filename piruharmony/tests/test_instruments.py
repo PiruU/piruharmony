@@ -41,3 +41,4 @@ def test_open_d_guitar():
     target_key_indices = [34, 41, 46, 49, 53]
     open_d_guitar = strings_instrument(['D3', 'A3', 'D4', 'G4', 'A4', 'D5'])
     assert open_d_guitar.to_keyboard(tested_tablature) == target_key_indices
+

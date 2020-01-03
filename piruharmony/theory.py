@@ -1,12 +1,13 @@
 from keyboard import notes_references
 from enum import Enum
-from itertools import product
+from itertools import product, chain
 from functools import reduce
 from operator import add
 
 
 DEFAULT_NOTE_TAG = 'A4'
 VALID_TONES = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+VALID_ALTERATIONS = ['#', '', 'b']
 
 
 def note(note_name = DEFAULT_NOTE_TAG):
@@ -255,6 +256,180 @@ class Note:
     def keyboard_index(self):
         """ Returns the piano's key index corresponding to the note. """
         return notes_references[self.name()]
+
+
+def transposed_note(base_note, transposition_interval, orientation = 'increase'):
+    """
+    Returns the transposed of a note.
+
+    Parameters
+    ----------
+    base_note : instance of Note.
+        The note of which the transposed is requested.
+    transposition_interval : instance of Interval.
+        The interval that defines the transpose.
+    orientation : list of chars.
+        Overrides the default 'increase' orientation. Describes the
+        transpose orientation.
+
+    Returns
+    -------
+    out : instance of Note
+        The instance of class Note resulting from the transpose of
+        base_note.
+
+    See Also
+    --------
+    NoteTranspose : a class that describes a note transpose.
+
+    Examples
+    --------
+    >>> base_note = note('C3')
+    >>> major_third = IntervalsTypes.MAJOR_THIRD.value
+    >>> transposed_note(base_note, major_third).name()
+    'E3'
+    >>> transposed_note(base_note, major_third, orientation = 'decrease').name()
+    'Ab2'
+    """
+    return NoteTranspose(base_note, transposition_interval, orientation).transposed()
+
+
+class NoteTranspose:
+    """
+    A class that describes a note transpose.
+
+    A class the permits the tranpose of a given note.
+
+    Parameters
+    ----------
+    base_note : instance of Note.
+        The note of which the transposed is requested.
+    transposition_interval : instance of Interval.
+        The interval that defines the transpose.
+    orientation : list of chars.
+        Overrides the default 'increase' orientation. Describes the
+        transpose orientation.
+
+    See Also
+    --------
+    transposed_note : returns the transposed of a note.
+
+    Examples
+    --------
+
+    Build increasing sixth-transposed of C3
+    >>> my_note = Note('C3')
+    >>> my_interval = IntervalsTypes.SIXTH.value
+    >>> my_transpose = NoteTranspose(my_note, my_interval, orientation = 'increase')
+    >>> my_transpose.transposed().name()
+    >>> 'A3'
+
+    Build decreasing minor third-transposed of C3
+    >>> my_note = Note('C3')
+    >>> my_interval = IntervalsTypes.MINOR_THIRD.value
+    >>> my_transpose = NoteTranspose(my_note, my_interval, orientation = 'decrease')
+    >>> my_transpose.transposed().name()
+    >>> 'A2'
+    """
+    def __init__(self, base_note, transposition_interval, orientation = 'increase'):
+        """ Builds an instance of NoteTranspose """
+        if orientation == 'increase':
+            self._transposition = TransposeToUpperNote(base_note, transposition_interval)
+        else:
+            self._transposition = TransposeToLowerNote(base_note, transposition_interval)
+
+    def tone(self):
+        """ Returns the tone of the transposed note """
+        return VALID_TONES[self._transposition.i_tone()]
+
+    def transposed(self):
+        """ Returns the transposed of input root_note """
+        possible_notes_names = _keyboard_to_possible_notes_names(self._transposition.i_keyboard())
+        return [note(name) for name in possible_notes_names if self.tone() in name][0]
+
+
+class TransposeToUpperNote:
+    """
+    A class that describes an increasing note transpose.
+
+    A class the permits the tranpose to a given upper note.
+
+    Parameters
+    ----------
+    base_note : instance of Note.
+        The note of which the transposed is requested.
+    transposition_interval : instance of Interval.
+        The interval that defines the transpose.
+
+    See Also
+    --------
+    transposed_note : returns the transposed of a note.
+
+    Examples
+    --------
+    Build increasing fifth-transposed of C3
+    >>> my_note = Note('C3')
+    >>> my_interval = IntervalsTypes.FIFTH.value
+    >>> my_transpose = TransposeToUpperNote(my_note, my_interval)
+    >>> my_transpose.transposed().name()
+    >>> 'G3'
+    """
+    def __init__(self, base_note, transposition_interval):
+        """ Builds an instance of TransposeToUpperNote """
+        self._note     = base_note
+        self._interval = transposition_interval
+
+    def i_keyboard(self):
+        """ Returns the keyboard note index of the transposed note """
+        return self._note.keyboard_index() + self._interval.count_semitones()
+
+    def i_tone(self):
+        """ Returns tone index of the transposed note as refered to in VALID_TONES """
+        n_tones_in_scale = 7
+        n_tones_in_transpose = self._interval.tones_range()
+        return (VALID_TONES.index(self._note.tone()) + n_tones_in_transpose) % n_tones_in_scale
+
+
+class TransposeToLowerNote:
+    """
+    A class that describes a decreasing note transpose.
+
+    A class the permits the tranpose to a given lower note.
+
+    Parameters
+    ----------
+    base_note : instance of Note.
+        The note of which the transposed is requested.
+    transposition_interval : instance of Interval.
+        The interval that defines the transpose.
+
+    See Also
+    --------
+    transposed_note : returns the transposed of a note.
+
+    Examples
+    --------
+    Build decreasing fourth-transposed of C3
+    >>> my_note = Note('C3')
+    >>> my_interval = IntervalsTypes.FOURTH.value
+    >>> my_transpose = TransposeToLowerNote(my_note, my_interval)
+    >>> my_transpose.transposed().name()
+    >>> 'G2'
+    """
+    def __init__(self, base_note, transposition_interval):
+        """ Builds an instance of TransposeToLowerNote """
+        self._note     = base_note
+        self._interval = transposition_interval
+
+    def i_keyboard(self):
+        """ Returns the keyboard note index of the transposed note """
+        return self._note.keyboard_index() - self._interval.count_semitones()
+
+    def i_tone(self):
+        """ Returns tone index of the transposed note as refered to in VALID_TONES """
+        n_tones_in_scale = 7
+        n_tones_in_transpose = self._interval.tones_range()
+        return (VALID_TONES.index(self._note.tone()) + n_tones_in_scale - n_tones_in_transpose) % n_tones_in_scale
 
 
 def interval(root_note_name, slave_note_name):
@@ -660,6 +835,13 @@ class Chord:
         """ Returns true if chord_type is a subset of self._intervals """
         return all(interval.value in self._intervals for interval in chord_type.value)
 
+    def notes(self):
+        """  """
+        chord_notes = [self._root_note]
+        for interval in self._intervals:
+            chord_notes.append(transposed_note(self._root_note, interval))
+        return chord_notes
+
 
 class ChordsTypes(Enum):
     """
@@ -680,9 +862,10 @@ class ChordsTypes(Enum):
     HALF_DIMINISHED_SEVENTH   = [IntervalsTypes.MINOR_THIRD, IntervalsTypes.DIMINISHED_FIFTH, IntervalsTypes.MINOR_SEVENTH]
     AUGMENTED_MAJOR_SEVENTH   = [IntervalsTypes.MAJOR_THIRD, IntervalsTypes.AUGMENTED_FIFTH, IntervalsTypes.MAJOR_SEVENTH]
     DIMINISHED_SEVENTH        = [IntervalsTypes.MINOR_THIRD, IntervalsTypes.DIMINISHED_FIFTH, IntervalsTypes.DIMINISHED_SEVENTH]
-    ROCK_FIFTH                = [IntervalsTypes.FIFTH]
+    POWER_CHORD               = [IntervalsTypes.FIFTH]
+    MAJOR_THIRD_ALONE         = [IntervalsTypes.MAJOR_THIRD]
+    MINOR_THIRD_ALONE         = [IntervalsTypes.MINOR_THIRD]
     UNKNOWN                   = []
-
 
 def chord_explorer(notes_names):
     """
@@ -738,6 +921,7 @@ def chord_explorer(notes_names):
 class ChordExplorer:
     """
     A class that can be used so as to explore chords properties.
+    Chord inversions are analyzed.
 
     Parameters
     ----------
@@ -746,16 +930,39 @@ class ChordExplorer:
 
     Examples
     --------
-
-    Build a major triad chord with root note C3
-    >>> my_root_note = note('C3')
-    >>> my_intervals = [IntervalsTypes.MAJOR_THIRD.value, IntervalsTypes.FIFTH.value]
-    >>> my_chord = Chord(root_note = my_root_note, chord_intervals = my_intervals)
-
-    Compare chords intervals
-    >>> my_chord.has_type(ChordsTypes.MAJOR_TRIAD)
+    >>> chord_explorer = ChordExplorer(chord(['C3', 'E3', 'G3']))
+    >>> ChordsTypes.MAJOR_TRIAD in [p.base_type() for p in chord_explorer.possible_harmonic_properties()]
     True
-    >>> my_chord.has_type(ChordsTypes.MINOR_TRIAD)
+    >>> chord_explorer = ChordExplorer(chord(['G2', 'C3', 'E3']))
+    >>> ChordsTypes.MAJOR_TRIAD in [p.base_type() for p in chord_explorer.possible_harmonic_properties()]
+    True
+    """
+    def __init__(self, explored_chord):
+        """  """
+        self._chords = [explored_chord] + inversed_chords(explored_chord)
+
+    def possible_harmonic_properties(self):
+        """  """
+        return list(chain(*[StaticChordExplorer(chord).possible_harmonic_properties() for chord in self._chords]))
+
+
+class StaticChordExplorer:
+    """
+    A class that can be used so as to explore chords properties.
+    Chord inversions are ignored.
+
+    Parameters
+    ----------
+    explored_chord : Chord
+        chord the properties of which will be analyzed.
+
+    Examples
+    --------
+    >>> chord_explorer = StaticChordExplorer(chord(['C3', 'E3', 'G3']))
+    >>> ChordsTypes.MAJOR_TRIAD in [p.base_type() for p in chord_explorer.possible_harmonic_properties()]
+    True
+    >>> chord_explorer = StaticChordExplorer(chord(['G2', 'C3', 'E3']))
+    >>> ChordsTypes.MAJOR_TRIAD in [p.base_type() for p in chord_explorer.possible_harmonic_properties()]
     False
     """
     def __init__(self, explored_chord):
@@ -781,7 +988,7 @@ class ChordExplorer:
         """ Returns the list of all possible harmonic properties as instances of ChordHarmonicProperties """
         tonality = self.tonality()
         types_zip_enrichments = zip(self.possible_base_types(), self.possible_enrichments_lists())
-        return [ChordHarmonicProperties(tonality, type, enrichments) for (type, enrichments) in types_zip_enrichments]        
+        return [ChordHarmonicProperties(tonality, type, enrichments) for (type, enrichments) in types_zip_enrichments]
 
 
 class ChordHarmonicProperties:
@@ -845,10 +1052,13 @@ class ChordHarmonicProperties:
 
     def __eq__(self, other):
         """ Comparison operator overloading """
-        same_tonality    = self.tonality()    == other.tonality()
-        same_base_type   = self.base_type()   == other.base_type()
-        same_enrichments = self.enrichments() == other.enrichments()
-        return same_tonality and same_base_type and same_enrichments
+        if other != None:
+            same_tonality    = self.tonality()    == other.tonality()
+            same_base_type   = self.base_type()   == other.base_type()
+            same_enrichments = self.enrichments() == other.enrichments()
+            return same_tonality and same_base_type and same_enrichments
+        else:
+            return False
 
 
 def _keyboard_to_possible_notes_names(i_note):
@@ -1215,7 +1425,141 @@ def keyboard_to_chord_properties(i_notes_on_keyboard):
     """
     all_possible = KeyboardToHarmonicPropertiesTranslator(i_notes_on_keyboard).possible_harmonic_properties()
     most_likely = guess_most_likely_harmonic_properties(all_possible)
-    if len(most_likely) > 0:
-        return most_likely[0]
+    bass_tonalities = [n.tone() for n in notes(_keyboard_to_possible_notes_names(min(i_notes_on_keyboard)))]
+    fundamentals = list(filter(lambda properties: properties.tonality() in bass_tonalities, most_likely))
+    inversions = list(filter(lambda properties: properties.tonality() not in bass_tonalities, most_likely))
+    if len(fundamentals) > 0:
+        return fundamentals[0]
+    elif len(inversions) > 0:
+        return inversions[0]
     else:
         return None
+
+
+def count_inversions(base_chord):
+    """
+    Returns the number of possible inversions of base_chord.
+
+    Parameters
+    ----------
+    base_chord : instance of Chord
+        Analyzed chord.
+
+    Returns
+    -------
+    out : int
+        The number of possible inversions of base_chord.
+
+    Examples
+    --------
+    >>> analyzed_chord = chord(['C3', 'E3', 'G3', 'E4'])
+    >>> count_inversions(analyzed_chord)
+    2
+    """
+    return len(base_chord.intervals())
+
+
+def inversed_chord(base_chord, i_inversion):
+    """
+    Returns the i_inversion-th inversed chord of base_chord.
+
+    Parameters
+    ----------
+    base_chord : instance of Chord
+        Chord the inversion of which is requested.
+    i_inversion : int
+        Index of chord inversion. Inversion indices are sorted by
+        diminished interval ranges. That is, the first inversion is
+        obtained by inverting the greatest interval in base_chord,
+        and so on.
+
+    Returns
+    -------
+    out : instance of Chord
+        The instance of Chord corresponding to the inversion.
+
+    Examples
+    --------
+    >>> my_chord = chord(['E2', 'C3', 'G3'])
+    >>> [i.type().name for i in inversed_chord(my_chord, 0).intervals()]
+    ['MAJOR_THIRD', 'FIFTH']
+    """
+    return ChordInversion(base_chord, i_inversion).inversed()
+
+
+def inversed_chords(base_chord):
+    """
+    Returns all possible inversions of base_chord.
+
+    Parameters
+    ----------
+    base_chord : instance of Chord
+        Chord the inversion of which is requested.
+
+    Returns
+    -------
+    out : list of instances of Chord
+        Possible inversions of base_chord.
+
+    Examples
+    --------
+    >>> my_chord = chord(['C3', 'E3', 'G3'])
+    >>> inversions = inversed_chords(my_chord)
+    >>> for c in inversions:
+    ...     [i.type().name for i in c.intervals()]
+    ['FOURTH', 'SIXTH']
+    ['MINOR_THIRD', 'DIMINISHED_SIXTH']
+    """
+    n_inversions = count_inversions(base_chord)
+    return [inversed_chord(base_chord, i_inversion) for i_inversion in range(n_inversions)]
+
+
+class ChordInversion:
+    """
+    A class that permits the inversion of chords.
+
+    Parameters
+    ----------
+    base_chord : instance of Chord
+        Chord the inversion of which is requested.
+    i_inversion : int
+        Index of chord inversion. Inversion indices are sorted by
+        diminished interval ranges. That is, the first inversion is
+        obtained by inverting the greatest interval in base_chord,
+        and so on.
+
+    Examples
+    --------
+    >>> my_chord = chord(['E2', 'C3', 'G3'])
+    >>> my_inversion = ChordInversion(my_chord, 0)
+    >>> [i.type().name for i in my_inversion.inversed().intervals()]
+    ['MAJOR_THIRD', 'FIFTH']
+    """
+    def __init__(self, base_chord, i_inversion):
+        """ Buidls an instance of ChordInversion """
+        self._chord      = base_chord
+        self._i_inversion = i_inversion
+
+    def root_note_index(self):
+        """ Returns the index of the root note of the inversion """
+        return -(1 + self._i_inversion)
+
+    def root_note(self):
+        """ Returns the root note of the inversion """
+        i_root_note, octave = self.root_note_index(), Interval(n_semitones = 12, tones_range = 0)
+        return transposed_note(
+        base_note              = self._chord.notes()[self.root_note_index()],
+        transposition_interval = octave,
+        orientation            = 'decrease'
+        )
+
+    def inversed_notes(self):
+        """ Returns the notes of the inversed chord """
+        chord_notes = self._chord.notes()
+        chord_notes[self.root_note_index()] = self.root_note()
+        return chord_notes
+
+    def inversed(self):
+        """ Returns the inversed chord corresponding to input parameters """
+        return chord([note.name() for note in self.inversed_notes()])
+
