@@ -172,10 +172,10 @@ def test_major_seventh():
     assert tested_interval.has_type(IntervalsTypes.MAJOR_SEVENTH)
 
 def test_major_triad_contains_rock_fifth():
-    assert chord(['C3', 'E3', 'G3']).contains_type(ChordsTypes.ROCK_FIFTH) == True
+    assert chord(['C3', 'E3', 'G3']).contains_type(ChordsTypes.POWER_CHORD) == True
 
 def test_major_seventh_contains_rock_fifth():
-    assert chord(['C3', 'E3', 'G3', 'B3']).contains_type(ChordsTypes.ROCK_FIFTH) == True
+    assert chord(['C3', 'E3', 'G3', 'B3']).contains_type(ChordsTypes.POWER_CHORD) == True
 
 def test_major_seventh_contains_major_seventh():
     assert chord(['C3', 'E3', 'G3', 'B3']).contains_type(ChordsTypes.MAJOR_SEVENTH) == True
@@ -193,7 +193,7 @@ def test_major_seventh_doesnt_contain_minor_seventh():
     assert chord(['C3', 'E3', 'G3', 'B3']).contains_type(ChordsTypes.MINOR_SEVENTH) == False
 
 def test_minor_seventh_contains_rock_fifth():
-    assert chord(['C3', 'Eb3', 'G3', 'Bb3']).contains_type(ChordsTypes.ROCK_FIFTH) == True
+    assert chord(['C3', 'Eb3', 'G3', 'Bb3']).contains_type(ChordsTypes.POWER_CHORD) == True
 
 def test_minor_seventh_contains_minor_triad():
     assert chord(['C3', 'Eb3', 'G3', 'Bb3']).contains_type(ChordsTypes.MINOR_TRIAD) == True
@@ -214,7 +214,7 @@ def test_minor_seventh_doesnt_contain_major_seventh():
     assert chord(['C3', 'Eb3', 'G3', 'Bb3']).contains_type(ChordsTypes.MAJOR_SEVENTH) == False
 
 def test_seventh_contains_rock_fifth():
-    assert chord(['C3', 'E3', 'G3', 'Bb3']).contains_type(ChordsTypes.ROCK_FIFTH) == True
+    assert chord(['C3', 'E3', 'G3', 'Bb3']).contains_type(ChordsTypes.POWER_CHORD) == True
 
 def test_seventh_doesnt_contain_minor_triad():
     assert chord(['C3', 'E3', 'G3', 'Bb3']).contains_type(ChordsTypes.MINOR_TRIAD) == False
@@ -262,68 +262,68 @@ def test_count_enrichments_chord_harmonic_properties_Fsus2sus4():
     expected_n_enrichments = 2
     assert tested_properties.count_enrichments() == expected_n_enrichments
 
-def test_chord_explorer_eb_tonality():
-    tested_tonality = chord_explorer(['Eb3', 'G4', 'Bb5']).tonality()
+def test_static_chord_explorer_eb_tonality():
+    tested_tonality = StaticChordExplorer(chord(['Eb3', 'G4', 'Bb5'])).tonality()
     expected_tonality = 'Eb'
     assert tested_tonality == expected_tonality
 
-def test_chord_explorer_g_tonality():
-    tested_tonality = chord_explorer(['G4', 'Eb5', 'Bb5']).tonality()
+def test_static_chord_explorer_g_tonality():
+    tested_tonality = StaticChordExplorer(chord(['G4', 'Eb5', 'Bb5'])).tonality()
     expected_tonality = 'G'
     assert tested_tonality == expected_tonality
 
-def test_chord_explorer_major_triad():
-    tested_base_types = chord_explorer(['C3', 'E4', 'G5']).possible_base_types()
+def test_static_chord_explorer_major_triad():
+    tested_base_types = StaticChordExplorer(chord(['C3', 'E4', 'G5'])).possible_base_types()
     expected_base_type = ChordsTypes.MAJOR_TRIAD
     assert expected_base_type in tested_base_types
 
-def test_chord_explorer_minor_triad():
-    tested_base_types = chord_explorer(['C3', 'Eb4', 'G5']).possible_base_types()
+def test_static_chord_explorer_minor_triad():
+    tested_base_types = StaticChordExplorer(chord(['C3', 'Eb4', 'G5'])).possible_base_types()
     expected_base_type = ChordsTypes.MINOR_TRIAD
     assert expected_base_type in tested_base_types
 
-def test_chord_explorer_major_seventh_triad():
-    tested_base_types = chord_explorer(['C3', 'E4', 'B5']).possible_base_types()
+def test_static_chord_explorer_major_seventh_triad():
+    tested_base_types = StaticChordExplorer(chord(['C3', 'E4', 'B5'])).possible_base_types()
     expected_base_type = ChordsTypes.MAJOR_SEVENTH_TRIAD
     assert expected_base_type in tested_base_types
 
-def test_chord_explorer_minor_seventh_triad():
-    tested_base_types = chord_explorer(['C3', 'Eb4', 'Bb5']).possible_base_types()
+def test_static_chord_explorer_minor_seventh_triad():
+    tested_base_types = StaticChordExplorer(chord(['C3', 'Eb4', 'Bb5'])).possible_base_types()
     expected_base_type = ChordsTypes.MINOR_SEVENTH_TRIAD
     assert expected_base_type in tested_base_types
 
-def test_chord_explorer_minor_major_seventh_triad():
-    tested_base_types = chord_explorer(['C3', 'Eb4', 'B5']).possible_base_types()
+def test_static_chord_explorer_minor_major_seventh_triad():
+    tested_base_types = StaticChordExplorer(chord(['C3', 'Eb4', 'B5'])).possible_base_types()
     expected_base_type = ChordsTypes.MINOR_MAJOR_SEVENTH_TRIAD
     assert expected_base_type in tested_base_types
 
-def test_chord_explorer_seventh_triad():
-    tested_base_types = chord_explorer(['C3', 'E4', 'Bb5']).possible_base_types()
+def test_static_chord_explorer_seventh_triad():
+    tested_base_types = StaticChordExplorer(chord(['C3', 'E4', 'Bb5'])).possible_base_types()
     expected_base_type = ChordsTypes.SEVENTH_TRIAD
     assert expected_base_type in tested_base_types
 
-def test_chord_explorer_diminished_triad():
-    tested_base_types = chord_explorer(['C3', 'Eb4', 'Gb5']).possible_base_types()
+def test_static_chord_explorer_diminished_triad():
+    tested_base_types = StaticChordExplorer(chord(['C3', 'Eb4', 'Gb5'])).possible_base_types()
     expected_base_type = ChordsTypes.DIMINISHED_TRIAD
     assert expected_base_type in tested_base_types
 
-def test_chord_explorer_major_seventh():
-    tested_base_types = chord_explorer(['C3', 'E4', 'G5', 'B4']).possible_base_types()
+def test_static_chord_explorer_major_seventh():
+    tested_base_types = StaticChordExplorer(chord(['C3', 'E4', 'G5', 'B4'])).possible_base_types()
     expected_base_type = ChordsTypes.MAJOR_SEVENTH
     assert expected_base_type in tested_base_types
 
-def test_chord_explorer_minor_seventh():
-    tested_base_types = chord_explorer(['C3', 'Eb4', 'G5', 'Bb5']).possible_base_types()
+def test_static_chord_explorer_minor_seventh():
+    tested_base_types = StaticChordExplorer(chord(['C3', 'Eb4', 'G5', 'Bb5'])).possible_base_types()
     expected_base_type = ChordsTypes.MINOR_SEVENTH
     assert expected_base_type in tested_base_types
 
-def test_chord_explorer_minor_major_seventh():
-    tested_base_types = chord_explorer(['C3', 'Eb4', 'G5', 'B5']).possible_base_types()
+def test_static_chord_explorer_minor_major_seventh():
+    tested_base_types = StaticChordExplorer(chord(['C3', 'Eb4', 'G5', 'B5'])).possible_base_types()
     expected_base_type = ChordsTypes.MINOR_MAJOR_SEVENTH
     assert expected_base_type in tested_base_types
 
-def test_chord_explorer_seventh():
-    tested_base_types = chord_explorer(['G3', 'B3', 'D4', 'F4']).possible_base_types()
+def test_static_chord_explorer_seventh():
+    tested_base_types = StaticChordExplorer(chord(['G3', 'B3', 'D4', 'F4'])).possible_base_types()
     expected_base_type = ChordsTypes.SEVENTH
     assert expected_base_type in tested_base_types
 
@@ -379,20 +379,20 @@ def test_count_minimum_enrichments_is_zero():
     ChordHarmonicProperties('C', ChordsTypes.MAJOR_TRIAD, [IntervalsTypes.MAJOR_SEVENTH]),
     ChordHarmonicProperties('C', ChordsTypes.MAJOR_SEVENTH, []),
     ]
-    expected_return = 0
-    assert count_minimum_enrichments(all_properties) == expected_return
+    expected_assert = 0
+    assert count_minimum_enrichments(all_properties) == expected_assert
 
 def test_enrichments_is_one():
     chord_properties = ChordHarmonicProperties('C', ChordsTypes.MAJOR_TRIAD, [IntervalsTypes.MAJOR_SEVENTH])
-    expected_return = 1
-    assert count_enrichments(chord_properties) == expected_return
+    expected_assert = 1
+    assert count_enrichments(chord_properties) == expected_assert
 
 def test_has_valid_enrichments_true():
     chord_properties = ChordHarmonicProperties('C', ChordsTypes.MAJOR_TRIAD, [IntervalsTypes.FOURTH])
     assert has_valid_enrichments(chord_properties) == True
 
 def test_has_valid_enrichments_false():
-    chord_properties = ChordHarmonicProperties('C', ChordsTypes.ROCK_FIFTH, [IntervalsTypes.MAJOR_THIRD])
+    chord_properties = ChordHarmonicProperties('C', ChordsTypes.POWER_CHORD, [IntervalsTypes.MAJOR_THIRD])
     assert has_valid_enrichments(chord_properties) == False
 
 def test_guess_most_likely_harmonic_properties_Csus4():
@@ -404,7 +404,7 @@ def test_guess_most_likely_harmonic_properties_Csus4():
 def test_guess_most_likely_harmonic_properties_C5sus4():
     all_possible = chord_explorer(['C3', 'F4', 'G5']).possible_harmonic_properties()
     most_likely = guess_most_likely_harmonic_properties(all_possible)
-    expected = ChordHarmonicProperties('C', ChordsTypes.ROCK_FIFTH, [IntervalsTypes.FOURTH])
+    expected = ChordHarmonicProperties('C', ChordsTypes.POWER_CHORD, [IntervalsTypes.FOURTH])
     assert expected == most_likely[0]
 
 def test_guess_most_likely_harmonic_properties_Cmaj7():
@@ -445,4 +445,150 @@ def test_keyboard_to_chord_properties_Csus4():
     tested = keyboard_to_chord_properties([27, 31, 34, 44])
     expected = ChordHarmonicProperties('C', ChordsTypes.MAJOR_TRIAD, [IntervalsTypes.FOURTH])
     assert tested == expected
+
+def test_transposed_note_increasing_diminished_ninth():
+    tested_note = note('C3')
+    transposition_interval = IntervalsTypes.DIMINISHED_NINTH.value
+    expected_note_name = 'Db3'
+    assert transposed_note(tested_note, transposition_interval, orientation = 'increase').name() == expected_note_name
+
+def test_transposed_note_increasing_ninth():
+    tested_note = note('C3')
+    transposition_interval = IntervalsTypes.NINTH.value
+    expected_note_name = 'D3'
+    assert transposed_note(tested_note, transposition_interval, orientation = 'increase').name() == expected_note_name
+
+def test_transposed_note_increasing_augmented_ninth():
+    tested_note = note('C3')
+    transposition_interval = IntervalsTypes.AUGMENTED_NINTH.value
+    expected_note_name = 'D#3'
+    assert transposed_note(tested_note, transposition_interval, orientation = 'increase').name() == expected_note_name
+
+def test_transposed_note_increasing_minor_third():
+    tested_note = note('C3')
+    transposition_interval = IntervalsTypes.MINOR_THIRD.value
+    expected_note_name = 'Eb3'
+    assert transposed_note(tested_note, transposition_interval, orientation = 'increase').name() == expected_note_name
+
+def test_transposed_note_increasing_major_third():
+    tested_note = note('C3')
+    transposition_interval = IntervalsTypes.MAJOR_THIRD.value
+    expected_note_name = 'E3'
+    assert transposed_note(tested_note, transposition_interval, orientation = 'increase').name() == expected_note_name
+
+def test_transposed_note_increasing_diminished_fourth():
+    tested_note = note('C3')
+    transposition_interval = IntervalsTypes.DIMINISHED_FOURTH.value
+    expected_note_name = 'Fb3'
+    assert transposed_note(tested_note, transposition_interval, orientation = 'increase').name() == expected_note_name
+
+def test_transposed_note_increasing_fourth():
+    tested_note = note('C3')
+    transposition_interval = IntervalsTypes.FOURTH.value
+    expected_note_name = 'F3'
+    assert transposed_note(tested_note, transposition_interval, orientation = 'increase').name() == expected_note_name
+
+def test_transposed_note_augmented_fourth():
+    tested_note = note('C3')
+    transposition_interval = IntervalsTypes.AUGMENTED_FOURTH.value
+    expected_note_name = 'F#3'
+    assert transposed_note(tested_note, transposition_interval, orientation = 'increase').name() == expected_note_name
+
+def test_transposed_note_increasing_diminished_fifth():
+    tested_note = note('C3')
+    transposition_interval = IntervalsTypes.DIMINISHED_FIFTH.value
+    expected_note_name = 'Gb3'
+    assert transposed_note(tested_note, transposition_interval, orientation = 'increase').name() == expected_note_name
+
+def test_transposed_note_increasing_fifth():
+    tested_note = note('C3')
+    transposition_interval = IntervalsTypes.FIFTH.value
+    expected_note_name = 'G3'
+    assert transposed_note(tested_note, transposition_interval, orientation = 'increase').name() == expected_note_name
+
+def test_transposed_note_augmented_fifth():
+    tested_note = note('C3')
+    transposition_interval = IntervalsTypes.AUGMENTED_FIFTH.value
+    expected_note_name = 'G#3'
+    assert transposed_note(tested_note, transposition_interval, orientation = 'increase').name() == expected_note_name
+
+def test_transposed_note_increasing_diminished_ninth():
+    tested_note = note('A3')
+    transposition_interval = IntervalsTypes.DIMINISHED_NINTH.value
+    expected_note_name = 'G#3'
+    assert transposed_note(tested_note, transposition_interval, orientation = 'decrease').name() == expected_note_name
+
+def test_transposed_note_increasing_ninth():
+    tested_note = note('A3')
+    transposition_interval = IntervalsTypes.NINTH.value
+    expected_note_name = 'G3'
+    assert transposed_note(tested_note, transposition_interval, orientation = 'decrease').name() == expected_note_name
+
+def test_transposed_note_increasing_augmented_ninth():
+    tested_note = note('A3')
+    transposition_interval = IntervalsTypes.AUGMENTED_NINTH.value
+    expected_note_name = 'Gb3'
+    assert transposed_note(tested_note, transposition_interval, orientation = 'decrease').name() == expected_note_name
+
+def test_transposed_note_decreasing_minor_third():
+    tested_note = note('C3')
+    transposition_interval = IntervalsTypes.MINOR_THIRD.value
+    expected_note_name = 'A2'
+    assert transposed_note(tested_note, transposition_interval, orientation = 'decrease').name() == expected_note_name
+
+def test_transposed_note_decreasing_major_third():
+    tested_note = note('C3')
+    transposition_interval = IntervalsTypes.MAJOR_THIRD.value
+    expected_note_name = 'Ab2'
+    assert transposed_note(tested_note, transposition_interval, orientation = 'decrease').name() == expected_note_name
+
+def test_count_inversions_of_major_triad():
+    tested_chord = chord(['C3', 'E3', 'G3', 'E4'])
+    expected_inversions_count = 2
+    assert count_inversions(tested_chord) == expected_inversions_count
+
+def test_count_inversions_of_major_seventh():
+    tested_chord = chord(['C3', 'E3', 'G3', 'B4'])
+    expected_inversions_count = 3
+    assert count_inversions(tested_chord) == expected_inversions_count
+
+def test_major_triad_first_inversion():
+    tested_intervals = inversed_chord(chord(['C3', 'E3', 'G3']), 0).intervals()
+    expected_intervals = [IntervalsTypes.FOURTH.value, IntervalsTypes.SIXTH.value]
+    assert tested_intervals == expected_intervals
+
+def test_major_triad_second_inversion():
+    tested_intervals = inversed_chord(chord(['C3', 'E3', 'G3']), 1).intervals()
+    expected_intervals = [IntervalsTypes.MINOR_THIRD.value, IntervalsTypes.DIMINISHED_SIXTH.value]
+    assert tested_intervals == expected_intervals
+
+def test_minor_triad_first_inversion():
+    tested_intervals = inversed_chord(chord(['C3', 'Eb3', 'G3']), 0).intervals()
+    expected_intervals = [IntervalsTypes.FOURTH.value, IntervalsTypes.DIMINISHED_SIXTH.value]
+    assert tested_intervals == expected_intervals
+
+def test_minor_triad_second_inversion():
+    tested_intervals = inversed_chord(chord(['C3', 'Eb3', 'G3']), 1).intervals()
+    expected_intervals = [IntervalsTypes.MAJOR_THIRD.value, IntervalsTypes.SIXTH.value]
+    assert tested_intervals == expected_intervals
+
+def test_chord_explorer_major_triad_first_inversion_contains_major_triad():
+    chord_explorer = ChordExplorer(chord(['G2', 'C3', 'E3']))
+    expected_true  = ChordsTypes.MAJOR_TRIAD in [p.base_type() for p in chord_explorer.possible_harmonic_properties()]
+    assert expected_true == True
+
+def test_chord_explorer_major_triad_second_inversion_contains_major_triad():
+    chord_explorer = ChordExplorer(chord(['E2', 'G2', 'C3']))
+    expected_true  = ChordsTypes.MAJOR_TRIAD in [p.base_type() for p in chord_explorer.possible_harmonic_properties()]
+    assert expected_true == True
+
+def test_chord_explorer_minor_triad_first_inversion_contains_minor_triad():
+    chord_explorer = ChordExplorer(chord(['G2', 'C3', 'Eb3']))
+    expected_true  = ChordsTypes.MINOR_TRIAD in [p.base_type() for p in chord_explorer.possible_harmonic_properties()]
+    assert expected_true == True
+
+def test_chord_explorer_minor_triad_second_inversion_contains_minor_triad():
+    chord_explorer = ChordExplorer(chord(['Eb2', 'G2', 'C3']))
+    expected_true  = ChordsTypes.MINOR_TRIAD in [p.base_type() for p in chord_explorer.possible_harmonic_properties()]
+    assert expected_true == True
 
